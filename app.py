@@ -27,34 +27,57 @@ def input_pdf_text(uploaded_file):
 #Prompt Template
 
 input_prompt="""
-Hey Act Like a skilled or very experience ATS(Application Tracking System)
-with a deep understanding of tech field,software engineering,data science ,data analyst
-and big data engineer. Your task is to evaluate the resume based on the given job description.
-You must consider the job market is very competitive and you should provide 
-best assistance for improving thr resumes. Assign the percentage Matching based 
-on Jd and
-the missing keywords with high accuracy
-resume:{text}
-description:{jd}
+You are an ATS resume evaluator.
 
-I want the response in one single string having the structure
-{{"JD Match":"%","MissingKeywords:[]","Profile Summary":""}}
+Analyze the resume and return the result strictly in the following format:
+
+Score: <number>/100
+
+Strengths:
+- point 1
+- point 2
+
+Weaknesses:
+- point 1
+- point 2
+
+Suggestions:
+- point 1
+- point 2
+
+Keep it concise and structured.
 """
 
 ## streamlit app
 st.title("Smart ATS")
 st.text("Improve Your Resume ATS")
 jd=st.text_area("Paste the Job Description")
-uploaded_file=st.file_uploader("Upload Your Resume",type="pdf",help="Please uplaod the pdf")
+uploaded_file = st.file_uploader("Upload Your Resume", type="pdf")
 
-submit = st.button("Submit")
+if st.button("Analyze Resume"):
 
-if submit:
-    if uploaded_file is not None and jd:
+    if uploaded_file is None:
+        st.warning("Please upload a resume.")
+
+    elif not jd:
+        st.warning("Please paste the job description.")
+
+    else:
+        st.success("Analyzing resume...")
+
         text = input_pdf_text(uploaded_file)
 
-        final_prompt = input_prompt.format(text=text, jd=jd)
+        final_prompt = f"""
+        {input_prompt}
+
+        Job Description:
+        {jd}
+
+        Resume:
+        {text}
+        """
 
         response = get_llm_response(final_prompt)
 
-        st.subheader(response)
+        st.subheader("ATS Analysis")
+        st.markdown(response)
